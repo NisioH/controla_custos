@@ -25,24 +25,36 @@ class AppDoces:
             selected_index=1,
             animation_duration=300,
             expand=True,
-            tabs=[
-                ft.Tab(
-                    label="Receitas",
-                    icon=ft.Icons.RESTAURANT_MENU,
-                    content=ft.Container(
-                        content=ft.Text("Módulo de Receitas em breve...", size=20),
-                        padding=20, alignment=ft.alignment.center
-                    )
-                ),
-                ft.Tab(
-                    label="Ingredientes",
-                    icon=ft.Icons.KITCHEN,
-                    content=ft.Container(
-                        content=IngredienteView(self.db),
-                        padding=20
-                    )
-                ),
-            ],
+            length=2,
+            content=ft.Column(
+                controls=[
+                    ft.TabBar(
+                        tabs=[
+                            ft.Tab(
+                                label="Receitas",
+                                icon=ft.Icons.RESTAURANT_MENU,
+                            ),
+                            ft.Tab(
+                                label="Ingredientes",
+                                icon=ft.Icons.KITCHEN,
+                            ),
+                        ]
+                    ),
+                    ft.TabBarView(
+                        expand=True,
+                        controls=[
+                            ft.Container(
+                                content=ft.Text("Módulo de Receitas em breve...", size=20),
+                                padding=20, alignment=ft.alignment.Alignment.CENTER
+                            ),
+                            ft.Container(
+                                content=IngredienteView(self.db),
+                                padding=20
+                            ),
+                        ]
+                    ),
+                ]
+            ),
         )
         self.page.add(self.tabs)
 
@@ -52,4 +64,4 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.run(main)

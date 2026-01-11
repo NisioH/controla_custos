@@ -39,7 +39,7 @@ class Database:
                                  FOREIGN KEY (id_receita) REFERENCES receitas(id),
                                  FOREIGN KEY(id_ingrediente) REFERENCES ingredientes(id))""")
 
-    def criar_ingredientes(self, nome, unidade, preco, peso_embalagem):
+    def criar_ingrediente(self, nome, unidade, preco, peso_embalagem):
         with self.abrir_cursor() as cursor:
             cursor.execute("INSERT INTO ingredientes (nome, unidade, preco, peso_embalagem) VALUES (?, ?, ?, ?)",
                            (nome, unidade, preco, peso_embalagem))
