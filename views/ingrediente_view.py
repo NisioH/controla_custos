@@ -106,7 +106,7 @@ class IngredienteView(ft.Column):
         self.txt_preco_compra.value = str(ingrediente[3])
         self.txt_peso_embalagem.value = str(ingrediente[4])
         self.btn_salvar.text = "Atualizar Cadastro"
-        self.btn_salvar.bgcolor = ft.Colors.ORANGE_700
+        self.btn_salvar.color = ft.Colors.ORANGE_700
         self.txt_nome.focus()
         self.update()
 
@@ -121,7 +121,7 @@ class IngredienteView(ft.Column):
         self.txt_peso_embalagem.value = ""
         self.id_em_edicao = None
         self.btn_salvar.text = "Salvar no Estoque"
-        self.btn_salvar.bgcolor = ft.Colors.BLUE_700
+        self.btn_salvar.color = ft.Colors.BLUE_700
         self.update()
 
     def notificar(self, msg):

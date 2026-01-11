@@ -12,7 +12,7 @@ class AppDoces:
 
     def configurar_pagina(self):
         self.page.title = "Controle de Custos - Doceria"
-        self.page.theme_mode = ft.ThemeMode.LIGHT
+        self.page.theme_mode = ft.ThemeMode.DARK
 
         # Ajustes de janela para PC e Mobile
         self.page.window_width = 450

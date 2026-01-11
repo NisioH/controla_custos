@@ -49,12 +49,12 @@ class Database:
             cursor.execute("SELECT * FROM ingredientes ORDER BY nome")
             return cursor.fetchall()
 
-    def atualizar_ingredientes(self, id_ing, nome, unidade, preco, peso_embalagem):
+    def atualizar_ingrediente(self, id_ing, nome, unidade, preco, peso_embalagem):
         with self.abrir_cursor() as cursor:
             cursor.execute("UPDATE ingredientes SET nome=?, unidade=?, preco=?, peso_embalagem=? WHERE id=?",
                            (nome, unidade, preco, peso_embalagem, id_ing))
 
-    def deletar_ingredientes(self, id_ing):
+    def deletar_ingrediente(self, id_ing):
         with self.abrir_cursor() as cursor:
             cursor.execute("DELETE FROM ingredientes WHERE id=?", (id_ing,))
 
@@ -67,7 +67,7 @@ class Database:
                 cursor.execute("INSERT INTO receitas_itens (id_receita, id_ingrediente, qtd_usada) "
                                "VALUES (?, ?, ?)",(id_receita, id_ing, qtd))
 
-    def ler_receitas(self):
+    def ler_receita(self):
         query = '''
         SELECT r.id, r.nome, r.rendimento,
         SUM(i.preco * ri.qtd_usada) AS custo_total
