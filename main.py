@@ -64,4 +64,10 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.run(main)
+    # Para testar no celular:
+    # 1. Instale o app 'Flet' na Google Play Store ou App Store
+    # 2. Rode este script no PC: flet run --android (ou --ios)
+    # OU para abrir no navegador do celular (IP: 192.168.1.39):
+    # ft.app(target=main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=8550)
+    
+    ft.app(target=main)
