@@ -9,7 +9,6 @@ class Database:
 
     @contextmanager
     def abrir_cursor(self):
-        # check_same_thread=False é importante para o Flet não travar o banco
         conn = sqlite3.connect(self.db_name, check_same_thread=False)
         cursor = conn.cursor()
         try:
@@ -23,7 +22,6 @@ class Database:
 
     def init_db(self):
         with self.abrir_cursor() as cursor:
-            # 1. Tabela de Ingredientes
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS ingredientes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +32,6 @@ class Database:
                 )
             """)
 
-            # 2. Tabela de Receitas
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS receitas (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +40,6 @@ class Database:
                 )
             """)
 
-            # 3. Tabela de Itens da Receita
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS receitas_itens (
                                                               id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -75,7 +71,6 @@ class Database:
             cursor.execute("DELETE FROM ingredientes WHERE id=?", (id_ing,))
 
     def criar_receita(self, nome, rendimento, itens):
-        """itens deve ser uma lista de dicionários: [{'id': 1, 'quantidade': 100}, ...]"""
         with self.abrir_cursor() as cursor:
             cursor.execute("INSERT INTO receitas (nome, rendimento) VALUES (?, ?)",
                            (nome, rendimento))
@@ -85,7 +80,6 @@ class Database:
                                "VALUES (?, ?, ?)", (id_receita, item['id'], item['quantidade']))
 
     def ler_receita(self):
-        # FÓRMULA CORRETA: (Preço / Peso Embalagem) * Quantidade Usada
         query = '''
             SELECT r.id,
                    r.nome,

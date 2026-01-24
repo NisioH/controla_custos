@@ -41,7 +41,6 @@ class IngredienteView(ft.Column):
             self.lista_ingredientes
         ]
 
-        # Só carrega os dados quando o componente aparece na tela
         self.on_mount = self.ao_montar
 
     def ao_montar(self, e):
