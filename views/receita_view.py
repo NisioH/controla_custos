@@ -4,6 +4,7 @@ class ReceitaView(ft.Column):
     def __init__(self, db):
         super().__init__()
         self.db = db
+        self.id_receita_atual = None
         self.expand = True
 
         self.txt_nome_receita = ft.TextField(
@@ -48,6 +49,13 @@ class ReceitaView(ft.Column):
         )
 
         self.controls = [
+            ft.Row([
+                ft.IconButton(
+                    icon=ft.Icons.ARROW_BACK,
+                    on_click=lambda _: self.page.go_home()
+                ),
+                ft.Text("Voltar para o Início")
+            ]),
             ft.Text("Nova Receita", size=24, weight=ft.FontWeight.BOLD),
             ft.Row([self.txt_nome_receita, self.txt_rendimento]),
             ft.Divider(),
@@ -83,37 +91,81 @@ class ReceitaView(ft.Column):
 
         self.update()
 
+    def preparar_edicao(self, dados_receita):
+        self.id_receita_atual = dados_receita[0]
+        self.txt_nome_receita.value = dados_receita[1]
+        self.txt_rendimento.value = str(dados_receita[2])
+
+        self.btn_salver_receita.text = "Atualizar Receita"
+        self.btn_salver_receita.bgcolor = ft.Colors.ORANGE_800
+
+        self.carregar_itens_da_receita(self.id_receita_atual)
+        self.update()
+
+    def carregar_itens_da_receita(self, id_rec):
+        self.lista_itens_temporaria = []
+        self.coluna_itens_visivel.controls.clear()
+        itens = self.db.buscar_itens_receita(id_rec)
+
+        for item in itens:
+            qtd = item[1]
+            qtd_limpa = int(qtd) if qtd == int(qtd) else qtd
+            self.coluna_itens_visivel.controls.append(
+                ft.Text(f". {item[0]}: {qtd_limpa}{item[2]}")
+            )
+
     def adicionar_item_lista(self, e):
+        # 1. Validação: Verifica se algo foi selecionado e se a quantidade foi digitada
         if not self.sel_ingrediente.value or not self.txt_quantidade.value:
             self.notificar("Selecione um ingrediente e a quantidade!")
             return
 
-        nome_ing = ""
-        for opt in self.sel_ingrediente.options:
-            if opt.key == self.sel_ingrediente.value:
-                nome_ing = opt.text
-                break
+        try:
+            # 2. Tratamento do número: converte vírgula para ponto e remove o .0 se for inteiro
+            valor_digitado = float(self.txt_quantidade.value.replace(",", "."))
+            qtd_limpa = int(valor_digitado) if valor_digitado == int(valor_digitado) else valor_digitado
 
-        self.lista_itens_temporaria.append({
-            "id": int(self.sel_ingrediente.value),
-            "quantidade": float(self.txt_quantidade.value.replace(",", "."))
-        })
+            # 3. Busca o nome e a unidade do ingrediente selecionado para exibir na lista
+            nome_exibicao = ""
+            for opt in self.sel_ingrediente.options:
+                if opt.key == self.sel_ingrediente.value:
+                    nome_exibicao = opt.text # Ex: "Açúcar (kg)"
+                    break
 
-        self.coluna_itens_visivel.controls.append(
-            ft.Container(
-                content=ft.Row([
-                    ft.Icon(ft.Icons.CHECK, color=ft.Colors.GREEN),
-                    ft.Text(f"{nome_ing} - Qtd: {self.txt_quantidade.value}", size=16, expand=True),
-                    ft.IconButton(ft.Icons.DELETE, icon_color=ft.Colors.RED_400,
-                                  on_click=lambda _: self.remover_item_da_temp(nome_ing))
-                ]),
-                bgcolor=ft.Colors.GREY_100,
-                padding=10,
-                border_radius=10,
+            # 4. Adiciona à lista "invisível" (que vai para o banco de dados)
+            item_temp = {
+                "id": int(self.sel_ingrediente.value),
+                "quantidade": valor_digitado
+            }
+            self.lista_itens_temporaria.append(item_temp)
+
+            # 5. Adiciona à lista "visível" (o que as suas filhas veem na tela)
+            self.coluna_itens_visivel.controls.append(
+                ft.Container(
+                    content=ft.Row([
+                        ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN_400, size=20),
+                        ft.Text(f"{nome_exibicao} - Qtd: {qtd_limpa}", size=16, expand=True),
+                        ft.IconButton(
+                            icon=ft.Icons.DELETE_OUTLINE,
+                            icon_color=ft.Colors.RED_400,
+                            tooltip="Remover este item",
+                            on_click=lambda _: self.remover_item_da_temp(item_temp, nome_exibicao)
+                        )
+                    ]),
+                    bgcolor=ft.Colors.BLUE_GREY_900,
+                    padding=10,
+                    border_radius=8,
+                    margin=ft.margin.only(bottom=5)
+                )
             )
-        )
-        self.txt_quantidade.value = ""
-        self.update()
+
+            # 6. Limpa o campo de quantidade e foca no dropdown para o próximo ingrediente
+            self.txt_quantidade.value = ""
+            self.txt_quantidade.focus()
+            self.update()
+
+        except ValueError:
+            self.notificar("Por favor, digite um número válido na quantidade!")
 
     def remover_item_da_temp(self, nome):
         self.notificar(f"Removido {nome} da lista!")
@@ -136,6 +188,43 @@ class ReceitaView(ft.Column):
 
         except Exception as err:
             self.notificar(f"Erro ao salvar receita: {err}")
+
+    def remover_item_da_temp(self, item_dict, nome_para_aviso):
+        try:
+            self.lista_itens_temporaria.remove(item_dict)
+
+            self.coluna_itens_visivel.controls.clear()
+
+            for item in self.lista_itens_temporaria:
+                nome_ing = "Ingreiente"
+                for opt in self.sel_ingrediente.options:
+                    if opt.key == str(item["id"]):
+                        nome_ing = opt.text
+                        break
+
+                qtd_limpa = int(item["quantidade"]) if item["quantidade"] == int(item["quantidade"]) else item["quantidade"]
+                self.coluna_itens_visivel.controls.append(
+                    ft.Container(
+                        content=ft.Row([
+                            ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN_400, size=20),
+                            ft.Text(f"{nome_ing} - Qtd: {qtd_limpa}", size=16, expand=True),
+                            ft.IconButton(
+                                icon=ft.Icons.DELETE_OUTLINE,
+                                icon_color=ft.Colors.RED_400,
+                                tooltip="Remover este item",
+                                on_click=lambda _: self.remover_item_da_temp(item, nome_para_aviso)
+                            )
+                        ]),
+                        bgcolor=ft.Colors.BLUE_GREY_900,
+                        padding=10,
+                        border_radius=8,
+                        margin=ft.margin.only(bottom=5)
+                    )
+                )
+            self.notificar(f"Removido {nome_para_aviso} da lista!")
+            self.update()
+        except Exception as err:
+            self.notificar(f"Erro ao remover item da lista: {err}")
 
     def notificar(self, msg):
         if self.page:

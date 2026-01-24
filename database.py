@@ -81,19 +81,30 @@ class Database:
 
     def ler_receita(self):
         query = '''
-            SELECT r.id,
-                   r.nome,
-                   r.rendimento,
-                   SUM((i.preco / i.peso_embalagem) * ri.qtd_usada) AS custo_total
-            FROM receitas r
-            LEFT JOIN receitas_itens ri ON r.id = ri.id_receita
-            LEFT JOIN ingredientes i ON ri.id_ingrediente = i.id
-            GROUP BY r.id
-            ORDER BY r.nome
-        '''
+                SELECT r.id, \
+                       r.nome, \
+                       r.rendimento,
+                       COALESCE(SUM((i.preco / i.peso_embalagem) * ri.qtd_usada), 0) AS custo_total
+                FROM receitas r
+                         LEFT JOIN receitas_itens ri ON r.id = ri.id_receita
+                         LEFT JOIN ingredientes i ON ri.id_ingrediente = i.id
+                GROUP BY r.id
+                ORDER BY r.nome \
+                '''
         with self.abrir_cursor() as cursor:
             cursor.execute(query)
             return cursor.fetchall()
+
+    def atualizar_receita(self, id_rec, nome, rendimento, novos_itens):
+        with self.abrir_cursor() as cursor:
+            cursor.execute("UPDATE receitas SET nome=?, rendimento=? WHERE id=?",
+                           (nome, rendimento, id_rec))
+            cursor.execute("DELETE FROM receitas_itens WHERE id_receita=?",
+                           (id_rec,))
+            for item in novos_itens:
+                cursor.execute("INSERT INTO receitas_itens "
+                               "(id_receita, id_ingrediente, qtd_usada) VALUES (?, ?, ?)",
+                               (id_rec, item['id'], item['quantidade']))
 
     def deletar_receita(self, id_rec):
         with self.abrir_cursor() as cursor:

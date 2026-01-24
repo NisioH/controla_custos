@@ -33,6 +33,14 @@ class IngredienteView(ft.Column):
 
         # --- Layout da Tela ---
         self.controls = [
+            ft.Row([
+                ft.IconButton(
+                    icon=ft.Icons.ARROW_BACK,
+                    on_click=lambda _: self.page.go_home()
+                ),
+                ft.Text("Voltar para o Início")
+            ]),
+
             ft.Text("Cadastro de Ingredientes", size=24, weight=ft.FontWeight.BOLD),
             ft.Row([self.txt_nome, self.txt_unidade]),
             ft.Row([self.txt_preco_compra, self.txt_peso_embalagem]),
@@ -44,9 +52,9 @@ class IngredienteView(ft.Column):
         self.on_mount = self.ao_montar
 
     def ao_montar(self, e):
-        self.atualizar_lista()
+        self.carregar_dados()
 
-    def atualizar_lista(self):
+    def carregar_dados(self):
         self.lista_ingredientes.controls.clear()
         dados = self.db.ler_ingredientes()
 
