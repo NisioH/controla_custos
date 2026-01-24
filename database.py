@@ -41,9 +41,8 @@ class Database:
             """)
 
             cursor.execute("""
-                CREATE TABLE IF NOT EXISTS receitas_itens (
-                                                              id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                              id_receita INTEGER,
+                CREATE TABLE IF NOT EXISTS receitas_itens (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                           id_receita INTEGER,
                                                               id_ingrediente INTEGER,
                                                               qtd_usada REAL,
                                                               FOREIGN KEY(id_receita) REFERENCES receitas (id),

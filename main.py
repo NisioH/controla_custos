@@ -69,9 +69,8 @@ class AppDoces:
         self.tela_receitas.visible = (indice == 1)
         self.tela_ingredientes.visible = (indice == 2)
 
-        if indice == 1 and not self.tela_receitas.visible:
-            self.view_receita.id_receita_atual = None
-            #self.view_receita.limpar_campos() # Caso tenha essa função
+        if indice == 1:
+            self.view_receita.limpar_campos() # Caso tenha essa função
 
         self.btn_inicio.style.color = ft.Colors.WHITE if indice == 0 else ft.Colors.WHITE60
         self.btn_receitas.style.color = ft.Colors.WHITE if indice == 1 else ft.Colors.WHITE60
@@ -84,7 +83,7 @@ class AppDoces:
         self.page.update()
 
     def abrir_edicao_receita(self, dados_receita):
-        """Função chamada quando clicamos em uma receita no Dashboard"""
+        """Função chamada quando clicamos numa receita no Dashboard"""
         self.mudar_aba(1)
         self.view_receita.preparar_edicao(dados_receita)
 
