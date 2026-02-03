@@ -80,10 +80,10 @@ class Database:
 
     def ler_receita(self):
         query = '''
-                SELECT r.id, \
-                       r.nome, \
+                SELECT r.id,
+                       r.nome,
                        r.rendimento,
-                       COALESCE(SUM((i.preco / i.peso_embalagem) * ri.qtd_usada), 0) AS custo_total
+                       SUM((i.preco / i.peso_embalagem) * ri.qtd_usada) AS custo_total
                 FROM receitas r
                          LEFT JOIN receitas_itens ri ON r.id = ri.id_receita
                          LEFT JOIN ingredientes i ON ri.id_ingrediente = i.id
@@ -112,7 +112,7 @@ class Database:
 
     def buscar_itens_receita(self, id_rec):
         query = '''
-            SELECT i.nome, ri.qtd_usada, i.unidade
+            SELECT i.nome, ri.qtd_usada, i.unidade, ri.id_ingrediente
             FROM receitas_itens ri
             JOIN ingredientes i ON ri.id_ingrediente = i.id
             WHERE ri.id_receita = ?

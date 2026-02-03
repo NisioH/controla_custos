@@ -28,14 +28,14 @@ class ReceitaView(ft.Column):
         self.controls = [
             ft.Row([
                 ft.IconButton(ft.Icons.ARROW_BACK, on_click=lambda _: self.page.go_home()),
-                ft.Text("Montar Receita", size=24, weight="bold")
+                ft.Text("Montar Receita", size=24, weight=ft.FontWeight.BOLD)
             ]),
             ft.Row([self.txt_nome_receita, self.txt_rendimento]),
             ft.Divider(),
             ft.Row([self.sel_ingrediente, self.txt_quantidade]),
             ft.ElevatedButton("Adicionar Ingrediente", icon=ft.Icons.ADD, on_click=self.adicionar_item_lista),
             ft.Divider(),
-            ft.Text("Itens da Receita:", weight="bold"),
+            ft.Text("Itens da Receita:", weight=ft.FontWeight.BOLD),
             self.coluna_itens_visivel,
             ft.Divider(),
             self.btn_salvar
@@ -71,10 +71,24 @@ class ReceitaView(ft.Column):
         self.btn_salvar.text = "Atualizar Receita"
         self.btn_salvar.bgcolor = ft.Colors.ORANGE_800
 
-        itens = self.db.buscar_itens_receita(self.id_receita_atual)
+        itens_do_banco = self.db.buscar_itens_receita(self.id_receita_atual)
 
-        for item in itens:
-            self.coluna_itens_visivel.controls.append(ft.Text(f"• {item[0]}: {item[1]} {item[2]}"))
+        for item in itens_do_banco:
+            item_dict = {"id": item[3], "quantidade": item[1]}
+            self.lista_itens_temporaria.append(item_dict)
+
+            qtd_limpa = int(item[1]) if item[1] == int(item[1]) else item[1]
+            nome_completo = f"{item[0]} ({item[2]})"
+
+            self.coluna_itens_visivel.controls.append(
+                ft.Row([
+                    ft.Icon(ft.Icons.CHECK, color="green"),
+                    ft.Text(f"{nome_completo} - {qtd_limpa}", expand=True),
+                    ft.IconButton(
+                        ft.Icons.DELETE, on_click=lambda _: self.remover_item(item_dict,nome_completo)
+                    )
+                ])
+            )
         self.update()
 
     def adicionar_item_lista(self, e):
@@ -97,15 +111,49 @@ class ReceitaView(ft.Column):
             ft.Row([
                 ft.Icon(ft.Icons.CHECK, color="green"),
                 ft.Text(f"{nome_ing} - {qtd_limpa}", expand=True),
-                ft.IconButton(ft.Icons.DELETE, on_click=lambda _: self.remover_item(item_dict))
+                ft.IconButton(ft.Icons.DELETE, on_click=lambda _: self.remover_item(e, item_dict))
             ])
         )
         self.txt_quantidade.value = ""
+        self.atualizar_lista_visual()
         self.update()
 
-    def remover_item(self, item_dict):
-        self.lista_itens_temporaria.remove(item_dict)
-        self.notificar("Item removido. Adicione os outros.")
+    def remover_item(self, e, item_dict):
+
+        try:
+            for item in self.lista_itens_temporaria:
+                if item["id"] == item_dict['id']:
+                    self.lista_itens_temporaria.remove(item)
+                    break
+            self.atualizar_lista_visual()
+            self.notificar("Item removido. Adicione os outros.")
+
+        except Exception as err:
+            self.notificar(f"Erro: {err}")
+
+    def atualizar_lista_visual(self):
+        self.coluna_itens_visivel.controls.clear()
+
+        for item in self.lista_itens_temporaria:
+            nome_ing = "Ingrediente"
+            for opt in self.sel_ingrediente.options:
+                if opt.key == str(item["id"]):
+                    nome_ing = opt.text
+                    break
+
+            qtd = item["quantidade"]
+            qtd_limpa = int(qtd) if qtd == int(qtd) else qtd
+
+            self.coluna_itens_visivel.controls.append(
+                ft.Row([
+                    ft.Icon(ft.Icons.CHECK, color="green"),
+                    ft.Text(f"{nome_ing} - {qtd_limpa}", expand=True),
+                    ft.IconButton(
+                        icon=ft.Icons.DELETE,
+                        on_click=lambda e, i=item: self.remover_item(e, i)
+                    )
+                ])
+            )
         self.update()
 
     def salvar_receita_completa(self, e):
