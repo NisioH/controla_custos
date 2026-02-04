@@ -5,7 +5,7 @@ class IngredienteView(ft.Column):
         super().__init__()
         self.db = db
         self.expand = True
-        self.id_em_edicao = None
+        self.id_ingrediente_atual = None
 
         # --- Campos de Entrada ---
         self.txt_nome = ft.TextField(label="Nome do Ingrediente:", expand=True)
@@ -84,44 +84,38 @@ class IngredienteView(ft.Column):
         self.update()
 
     def salvar_clicado(self, e):
-        # 1. Captura os valores
-        nome = self.txt_nome.value
-        unidade = self.txt_unidade.value  # Ex: kg, g, ml
-        preco = self.txt_preco_compra.value
-        peso = self.txt_peso_embalagem.value
-
-        # 2. Validação simples
-        if not nome or not preco or not peso:
-            self.notificar("Preencha todos os campos!")
-            return
-
         try:
-            # 3. Converte para os formatos corretos (importante!)
-            preco_float = float(preco.replace(",", "."))
-            peso_float = float(peso.replace(",", "."))
+            nome = self.txt_nome.value
+            unidade = self.txt_unidade.value
+            # CORREÇÃO: Usando os nomes corretos dos campos
+            preco = float(self.txt_preco_compra.value.replace(",", "."))
+            peso = float(self.txt_peso_embalagem.value.replace(",", "."))
 
-            # 4. Envia para o banco
-            self.db.criar_ingrediente(nome, unidade, preco_float, peso_float)
+            if self.id_ingrediente_atual:
+                self.db.atualizar_ingrediente(self.id_ingrediente_atual, nome, unidade, preco, peso)
+                self.notificar("Ingrediente atualizado com sucesso!")
+            else:
+                self.db.criar_ingrediente(nome, unidade, preco, peso)
+                self.notificar("Ingrediente criado com sucesso!")
 
-            # 5. Limpa os campos e avisa o usuário
-            self.txt_nome.value = ""
-            self.txt_preco_compra.value = ""
-            self.txt_peso_embalagem.value = ""
-            self.carregar_dados()  # Atualiza a listinha na tela
-            self.notificar(f"Ingrediente {nome} salvo!")
+            # Limpa tudo e volta o botão ao estado original
+            self.limpar_campos()
+            self.carregar_dados()
 
-        except ValueError:
-            self.notificar("Preço e Peso devem ser números!")
+        except Exception as err:
+            self.notificar(f"Erro ao salvar: {err}")
 
-    def preparar_edicao(self, ingrediente):
-        self.id_em_edicao = ingrediente[0]
-        self.txt_nome.value = ingrediente[1]
-        self.txt_unidade.value = ingrediente[2]
-        self.txt_preco_compra.value = str(ingrediente[3])
-        self.txt_peso_embalagem.value = str(ingrediente[4])
-        self.btn_salvar.text = "Atualizar Cadastro"
-        self.btn_salvar.color = ft.Colors.ORANGE_700
-        self.txt_nome.focus()
+    def preparar_edicao(self, dados):
+        # dados = (id, nome, unidade, preco, peso)
+        self.id_ingrediente_atual = dados[0] 
+        self.txt_nome.value = dados[1]
+        self.txt_unidade.value = dados[2]
+        # CORREÇÃO: Nomes dos campos para o modo edição
+        self.txt_preco_compra.value = str(dados[3])
+        self.txt_peso_embalagem.value = str(dados[4])
+        
+        self.btn_salvar.text = "Atualizar Ingrediente"
+        self.btn_salvar.bgcolor = ft.Colors.ORANGE_800
         self.update()
 
     def deletar(self, id_ing):
@@ -130,12 +124,13 @@ class IngredienteView(ft.Column):
         self.notificar("Removido!")
 
     def limpar_campos(self):
+        self.id_ingrediente_atual = None
         self.txt_nome.value = ""
+        self.txt_unidade.value = "g"
         self.txt_preco_compra.value = ""
         self.txt_peso_embalagem.value = ""
-        self.id_em_edicao = None
         self.btn_salvar.text = "Salvar no Estoque"
-        self.btn_salvar.color = ft.Colors.BLUE_700
+        self.btn_salvar.bgcolor = ft.Colors.BLUE_700
         self.update()
 
     def notificar(self, msg):

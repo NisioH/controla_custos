@@ -9,7 +9,7 @@ class ReceitaView(ft.Column):
         self.expand = True
 
         self.txt_nome_receita = ft.TextField(label="Nome da Receita", expand=True)
-        self.txt_rendimento = ft.TextField(label="Rendimento", value="1", width=100)
+        self.txt_rendimento = ft.TextField(label="Rendimento", value="1", width=120)
 
         self.sel_ingrediente = ft.Dropdown(label="Escolha um Ingrediente", expand=True)
         self.txt_quantidade = ft.TextField(label="Qtd", width=100, hint_text="Ex: 500")
@@ -61,8 +61,8 @@ class ReceitaView(ft.Column):
         self.btn_salvar.bgcolor = ft.Colors.GREEN_700
         self.update()
 
-    def preparar_edicao(self, dados):
-        """Preenche a tela com os dados de uma receita existente"""
+    """ def preparar_edicao(self, dados):
+        Preenche a tela com os dados de uma receita existent
         self.limpar_campos()
         self.id_receita_atual = dados[0]
         self.txt_nome_receita.value = dados[1]
@@ -89,72 +89,105 @@ class ReceitaView(ft.Column):
                     )
                 ])
             )
+        self.update() """
+    
+    def preparar_edicao(self, dados):
+        """Preenche a tela com os dados de uma receita existente"""
+        self.limpar_campos() # Reseta tudo antes de começar
+        
+        self.id_receita_atual = dados[0]
+        self.txt_nome_receita.value = dados[1]
+        
+        # Formata o rendimento para tirar o .0
+        rend = dados[2]
+        self.txt_rendimento.value = str(int(rend) if rend == int(rend) else rend)
+
+        # Muda o visual do botão para modo "Edição"
+        self.btn_salvar.text = "Atualizar Receita"
+        self.btn_salvar.bgcolor = ft.Colors.ORANGE_800
+
+        # 1. Busca os itens no banco de dados
+        itens_do_banco = self.db.buscar_itens_receita(self.id_receita_atual)
+
+        # 2. Alimenta apenas a lista "escondida" (a memória do Python)
+        for item in itens_do_banco:
+            # item[3] é o ID do ingrediente, item[1] é a quantidade usada
+            item_dict = {"id": item[3], "quantidade": item[1]}
+            self.lista_itens_temporaria.append(item_dict)
+
+        # 3. CHAMA A FUNÇÃO DE DESENHO (Ela vai criar os botões de excluir funcionais)
+        self.atualizar_lista_visual()
+
+    def atualizar_lista_visual(self):
+        """Limpa e recria a lista de ingredientes na tela"""
+        self.coluna_itens_visivel.controls.clear()
+        
+        # Se a lista estiver vazia, podemos mostrar um aviso opcional
+        if not self.lista_itens_temporaria:
+            self.coluna_itens_visivel.controls.append(
+                ft.Text("Nenhum ingrediente adicionado", italic=True, color="grey")
+            )
+        
+        for item in self.lista_itens_temporaria:
+            # Busca o nome para exibição
+            nome_ing = "Ingrediente"
+            for opt in self.sel_ingrediente.options:
+                if opt.key == str(item['id']):
+                    nome_ing = opt.text
+                    break
+            
+            qtd = item['quantidade']
+            qtd_limpa = int(qtd) if qtd == int(qtd) else qtd
+
+            # CRIAMOS O BOTÃO SEPARADO PARA TESTE
+            btn_excluir = ft.IconButton(
+                icon=ft.Icons.DELETE_OUTLINE,
+                icon_color=ft.Colors.RED_400,
+                # Forçamos a captura do item atual 'i'
+                on_click=lambda e, i=item: self.remover_item(e, i)
+            )
+
+            # MONTAMOS A LINHA
+            linha = ft.Container(
+                content=ft.Row([
+                    ft.Icon(ft.Icons.CHECK_CIRCLE, color="green", size=20),
+                    ft.Text(f"{nome_ing} - {qtd_limpa}", expand=True),
+                    btn_excluir, # Botão adicionado explicitamente
+                ]),
+                bgcolor=ft.Colors.BLACK12,
+                padding=10,
+                border_radius=8
+            )
+            
+            self.coluna_itens_visivel.controls.append(linha)
+        
         self.update()
 
     def adicionar_item_lista(self, e):
+        """Adiciona novo item e redesenha tudo"""
         if not self.sel_ingrediente.value or not self.txt_quantidade.value:
             return
 
-        valor = float(self.txt_quantidade.value.replace(",", "."))
-        qtd_limpa = int(valor) if valor == int(valor) else valor
-
-        nome_ing = ""
-        for opt in self.sel_ingrediente.options:
-            if opt.key == self.sel_ingrediente.value:
-                nome_ing = opt.text
-                break
-
-        item_dict = {"id": int(self.sel_ingrediente.value), "quantidade": valor}
-        self.lista_itens_temporaria.append(item_dict)
-
-        self.coluna_itens_visivel.controls.append(
-            ft.Row([
-                ft.Icon(ft.Icons.CHECK, color="green"),
-                ft.Text(f"{nome_ing} - {qtd_limpa}", expand=True),
-                ft.IconButton(ft.Icons.DELETE, on_click=lambda _: self.remover_item(e, item_dict))
-            ])
-        )
-        self.txt_quantidade.value = ""
-        self.atualizar_lista_visual()
-        self.update()
+        try:
+            qtd = float(self.txt_quantidade.value.replace(",", "."))
+            item_dict = {"id": int(self.sel_ingrediente.value), "quantidade": qtd}
+            
+            self.lista_itens_temporaria.append(item_dict)
+            self.txt_quantidade.value = ""
+            self.atualizar_lista_visual() # RE-DESENHA TUDO
+            
+        except ValueError:
+            self.notificar("Digite um número válido!")
 
     def remover_item(self, e, item_dict):
-
+        """Remove o item e redesenha tudo"""
         try:
-            for item in self.lista_itens_temporaria:
-                if item["id"] == item_dict['id']:
-                    self.lista_itens_temporaria.remove(item)
-                    break
+            # Removemos da lista de dados
+            self.lista_itens_temporaria.remove(item_dict)
+            # Forçamos a atualização visual completa
             self.atualizar_lista_visual()
-            self.notificar("Item removido. Adicione os outros.")
-
         except Exception as err:
-            self.notificar(f"Erro: {err}")
-
-    def atualizar_lista_visual(self):
-        self.coluna_itens_visivel.controls.clear()
-
-        for item in self.lista_itens_temporaria:
-            nome_ing = "Ingrediente"
-            for opt in self.sel_ingrediente.options:
-                if opt.key == str(item["id"]):
-                    nome_ing = opt.text
-                    break
-
-            qtd = item["quantidade"]
-            qtd_limpa = int(qtd) if qtd == int(qtd) else qtd
-
-            self.coluna_itens_visivel.controls.append(
-                ft.Row([
-                    ft.Icon(ft.Icons.CHECK, color="green"),
-                    ft.Text(f"{nome_ing} - {qtd_limpa}", expand=True),
-                    ft.IconButton(
-                        icon=ft.Icons.DELETE,
-                        on_click=lambda e, i=item: self.remover_item(e, i)
-                    )
-                ])
-            )
-        self.update()
+            print(f"Erro ao remover: {err}")
 
     def salvar_receita_completa(self, e):
         nome = self.txt_nome_receita.value

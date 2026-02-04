@@ -5,17 +5,21 @@ class DashboardView(ft.Column):
     def __init__(self, db, ao_editar):
         super().__init__()
         self.db = db
-        self.ao_editar = ao_editar  # Função que vem do main.py para abrir a edição
+        self.ao_editar = ao_editar  
         self.expand = True
 
-        # Lista onde as receitas serão desenhadas
+        
         self.lista_receitas = ft.Column(spacing=10, scroll=ft.ScrollMode.ADAPTIVE)
 
         self.controls = [
-            ft.Text("Minhas Receitas", size=28, weight=ft.FontWeight.BOLD),
-            ft.Text("Resumo de custos e lucros", color=ft.Colors.WHITE60),
-            ft.Divider(),
-            self.lista_receitas
+            ft.Column([
+                ft.Text("Minhas Receitas", size=28,  weight=ft.FontWeight.BOLD),
+                ft.Text("Resumo de custos e lucros", color=ft.Colors.WHITE60),
+                ft.Divider(),
+                self.lista_receitas
+            ], 
+            alignment=ft.MainAxisAlignment.CENTER,
+            )
         ]
 
     def carregar_dados(self):
