@@ -7,7 +7,6 @@ class IngredienteView(ft.Column):
         self.expand = True
         self.id_ingrediente_atual = None
 
-        # --- Campos de Entrada ---
         self.txt_nome = ft.TextField(label="Nome do Ingrediente:", expand=True)
         self.txt_unidade = ft.Dropdown(
             label="Und", width=110,
@@ -31,7 +30,6 @@ class IngredienteView(ft.Column):
 
         self.lista_ingredientes = ft.ListView(expand=True, spacing=10)
 
-        # --- Layout da Tela ---
         self.controls = [
             ft.Row([
                 ft.IconButton(
@@ -87,7 +85,6 @@ class IngredienteView(ft.Column):
         try:
             nome = self.txt_nome.value
             unidade = self.txt_unidade.value
-            # CORREÇÃO: Usando os nomes corretos dos campos
             preco = float(self.txt_preco_compra.value.replace(",", "."))
             peso = float(self.txt_peso_embalagem.value.replace(",", "."))
 
@@ -98,7 +95,6 @@ class IngredienteView(ft.Column):
                 self.db.criar_ingrediente(nome, unidade, preco, peso)
                 self.notificar("Ingrediente criado com sucesso!")
 
-            # Limpa tudo e volta o botão ao estado original
             self.limpar_campos()
             self.carregar_dados()
 
@@ -106,11 +102,9 @@ class IngredienteView(ft.Column):
             self.notificar(f"Erro ao salvar: {err}")
 
     def preparar_edicao(self, dados):
-        # dados = (id, nome, unidade, preco, peso)
         self.id_ingrediente_atual = dados[0] 
         self.txt_nome.value = dados[1]
         self.txt_unidade.value = dados[2]
-        # CORREÇÃO: Nomes dos campos para o modo edição
         self.txt_preco_compra.value = str(dados[3])
         self.txt_peso_embalagem.value = str(dados[4])
         

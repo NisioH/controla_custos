@@ -23,7 +23,6 @@ class DashboardView(ft.Column):
         ]
 
     def carregar_dados(self):
-        """Busca as receitas no banco e monta os cards na tela"""
         self.lista_receitas.controls.clear()
         receitas = self.db.ler_receita()
 
@@ -34,14 +33,12 @@ class DashboardView(ft.Column):
             )
         else:
             for rec in receitas:
-                # rec = (id, nome, rendimento, custo_total)
                 id_rec, nome, rendimento, custo_total = rec
 
                 rendimento_val = rendimento if rendimento > 0 else 1
 
                 custo_unitario = custo_total / rendimento_val
 
-                # Limpando o .0 do rendimento (ex: 2.0 vira 2)
                 rend_limpo = int(rendimento) if rendimento == int(rendimento) else rendimento
 
                 self.lista_receitas.controls.append(
@@ -54,7 +51,6 @@ class DashboardView(ft.Column):
                             title=ft.Text(nome, weight=ft.FontWeight.BOLD, size=18),
                             subtitle=ft.Text(f"Rendimento: {rend_limpo} porções | "
                                              f"Custo Unitário: R$ {custo_unitario:.2f}"),
-                            # Lado direito: Preço e Botão Excluir
                             trailing=ft.Row([
                                 ft.Text(f"R$ {custo_total:.2f}",
                                         color=ft.Colors.GREEN_400,
@@ -67,7 +63,6 @@ class DashboardView(ft.Column):
                                     on_click=lambda e, r_id=id_rec: self.deletar_e_atualizar(e, r_id)
                                 ),
                             ], tight=True),
-                            # Clique no card para editar
                             on_click=lambda _, r=rec: self.ao_editar(r)
                         ),
 
@@ -76,11 +71,9 @@ class DashboardView(ft.Column):
         self.update()
 
     def deletar_e_atualizar(self, e, r_id):
-        """Chama o banco para excluir e atualiza a lista na hora"""
         self.db.deletar_receita(r_id)
-        self.carregar_dados()  # Recarrega a lista para a receita sumir
+        self.carregar_dados() 
 
-        # Mostra um aviso rápido embaixo
         self.page.snack_bar = ft.SnackBar(
             ft.Text("Receita excluída com sucesso!"),
             bgcolor=ft.Colors.GREEN_700
