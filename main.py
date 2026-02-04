@@ -13,7 +13,7 @@ class AppDoces:
         self.renderizar_interface()
 
     def configurar_pagina(self):
-        self.page.title = "Custo Doces - Gestão Profissional"
+        self.page.title = "Custo Receitas"
         self.page.theme_mode = ft.ThemeMode.DARK
         self.page.window.width = 450
         self.page.window.height = 800
