@@ -6,7 +6,9 @@ class ReceitaView(ft.Column):
         self.db = db
         self.id_receita_atual = None
         self.lista_itens_temporaria = []
+        self.scroll = ft.ScrollMode.ADAPTIVE
         self.expand = True
+        self.spacing = 20
 
         self.txt_nome_receita = ft.TextField(label="Nome da Receita", expand=True)
         self.txt_rendimento = ft.TextField(label="Rendimento", value="1", width=120)
@@ -26,6 +28,12 @@ class ReceitaView(ft.Column):
         )
 
         self.controls = [
+            ft.Container(height=10),  # Um pequeno "respiro" no topo
+            ft.Row([
+                ft.IconButton(ft.Icons.ARROW_BACK, on_click=lambda _: self.page.go_home()),
+                ft.Text("Voltar para o Início", size=16)
+            ]),
+
             ft.Row([
                 ft.IconButton(ft.Icons.ARROW_BACK, on_click=lambda _: self.page.go_home()),
                 ft.Text("Montar Receita", size=24, weight=ft.FontWeight.BOLD)
