@@ -52,7 +52,7 @@ class AppDoces:
                 alignment=ft.MainAxisAlignment.CENTER,
             ),
             bgcolor=ft.Colors.BLUE_GREY_900,
-            padding=10
+            padding=ft.padding.symmetric(vertical=10)
         )
 
         self.page.add(
