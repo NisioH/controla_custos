@@ -19,7 +19,10 @@ class DashboardView(ft.Column):
 
         self.controls = [
             ft.Column([
-                ft.Text("Minhas Receitas!!!", size=28,  weight=ft.FontWeight.BOLD),
+                ft.Row([
+                    ft.Icon(ft.Icons.CAKE_ROUNDED, color=ft.Colors.PINK_500, size=50),
+                    ft.Text("Minhas Receitas!!!", size=28,  weight=ft.FontWeight.BOLD),
+                ], alignment=ft.MainAxisAlignment.START),
                 ft.Divider(height=10),
                 self.lista_receitas,
                 ft.Container(height=50)
