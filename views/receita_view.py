@@ -8,7 +8,9 @@ class ReceitaView(ft.Column):
         self.lista_itens_temporaria = []
         self.scroll = ft.ScrollMode.ADAPTIVE
         self.expand = True
-        self.spacing = 20
+        self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+        self.spacing = 15
+        self.padding = ft.padding.only(top=20, left=10, right=10, bottom=40)
 
         self.txt_nome_receita = ft.TextField(label="Nome da Receita", expand=True)
         self.txt_rendimento = ft.TextField(label="Rendimento", value="1", width=120)
@@ -48,6 +50,17 @@ class ReceitaView(ft.Column):
             ft.Divider(),
             self.btn_salvar
         ]
+    
+    def editar_item_lista(self, e, item_dict):
+        self.lista_itens_temporaria.remove(item_dict)
+
+        self.sel_ingrediente.value = str(item_dict["id"])
+        self.txt_quantidade.value = str(item_dict["quantidade"])
+
+        self.atualizar_lista_visual()
+
+        self.txt_quantidade.focus()
+
 
     def carregar_dados(self):
         ingredientes = self.db.ler_ingredientes()
@@ -122,7 +135,27 @@ class ReceitaView(ft.Column):
                 border_radius=8
             )
             
-            self.coluna_itens_visivel.controls.append(linha)
+            self.coluna_itens_visivel.controls.append(
+                ft.Container(
+                    bgcolor=ft.Colors.BLACK12,
+                    padding=10,
+                    border_radius=8,
+                    content=ft.Row([
+                        ft.Icon(ft.Icons.CHECK_CIRCLE, color="green", size=20),
+                        ft.Text(f"{nome_ing} - {qtd_limpa}", expand=True),
+                        ft.IconButton(
+                            icon=ft.Icons.EDIT_OUTLINED,
+                            icon_color=ft.Colors.BLUE_400,
+                            on_click=lambda e, i=item: self.editar_item_lista(e, i)
+                        ),
+                        ft.IconButton(
+                            icon=ft.Icons.DELETE_OUTLINE,
+                            icon_color=ft.Colors.RED_400,
+                            on_click=lambda e, i=item: self.remover_item(e, i)
+                        ),
+                    ])
+                )
+            )
         
         self.update()
 

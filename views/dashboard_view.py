@@ -8,17 +8,23 @@ class DashboardView(ft.Column):
         self.ao_editar = ao_editar  
         self.expand = True
 
+        self.scroll = ft.ScrollMode.ADAPTIVE
+
+        self.padding = ft.padding.only(top=10, left=15, right=15, bottom=20)
+
+        self.spacing = 20
+
         
-        self.lista_receitas = ft.Column(spacing=10, scroll=ft.ScrollMode.ADAPTIVE)
+        self.lista_receitas = ft.Column(spacing=10)
 
         self.controls = [
             ft.Column([
-                ft.Text("Minhas Receitas", size=28,  weight=ft.FontWeight.BOLD),
-                ft.Text("Resumo de custos e lucros", color=ft.Colors.WHITE60),
-                ft.Divider(),
-                self.lista_receitas
-            ], 
-            alignment=ft.MainAxisAlignment.CENTER,
+                ft.Text("Minhas Receitas!!!", size=28,  weight=ft.FontWeight.BOLD),
+                ft.Divider(height=10),
+                self.lista_receitas,
+                ft.Container(height=50)
+            ]
+           
             )
         ]
 
