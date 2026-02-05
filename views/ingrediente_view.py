@@ -75,7 +75,7 @@ class IngredienteView(ft.Column):
                             )
                         ], tight=True),
                     ),
-                    bgcolor=ft.Colors.GREY_100,
+                    bgcolor=ft.Colors.BLUE_GREY_900,
                     border_radius=10
                 )
             )

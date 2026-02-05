@@ -28,7 +28,7 @@ class ReceitaView(ft.Column):
         )
 
         self.controls = [
-            ft.Container(height=10),  # Um pequeno "respiro" no topo
+            ft.Container(height=20),  # Um pequeno "respiro" no topo
             ft.Row([
                 ft.IconButton(ft.Icons.ARROW_BACK, on_click=lambda _: self.page.go_home()),
                 ft.Text("Voltar para o Início", size=16)
