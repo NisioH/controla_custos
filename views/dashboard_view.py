@@ -5,30 +5,24 @@ class DashboardView(ft.Column):
     def __init__(self, db, ao_editar):
         super().__init__()
         self.db = db
-        self.ao_editar = ao_editar  
+        self.ao_editar = ao_editar
         self.expand = True
-
         self.scroll = ft.ScrollMode.ADAPTIVE
-
         self.padding = ft.padding.only(top=10, left=15, right=15, bottom=20)
-
         self.spacing = 20
 
-        
         self.lista_receitas = ft.Column(spacing=10)
 
         self.controls = [
             ft.Column([
                 ft.Row([
                     ft.Icon(ft.Icons.CAKE_ROUNDED, color=ft.Colors.PINK_500, size=50),
-                    ft.Text("Minhas Receitas!!!", size=28,  weight=ft.FontWeight.BOLD),
+                    ft.Text("Minhas Receitas!!!", size=28, weight=ft.FontWeight.BOLD),
                 ], alignment=ft.MainAxisAlignment.START),
                 ft.Divider(height=10),
                 self.lista_receitas,
                 ft.Container(height=50)
-            ]
-           
-            )
+            ])
         ]
 
     def carregar_dados(self):
@@ -42,11 +36,11 @@ class DashboardView(ft.Column):
             )
         else:
             for rec in receitas:
-                id_rec, nome, rendimento, custo_total = rec
+                id_rec, nome, rendimento, custo_total, porcentagem = rec
 
+                custo_seguro = custo_total if custo_total is not None else 0.0
                 rendimento_val = rendimento if rendimento > 0 else 1
-
-                custo_unitario = custo_total / rendimento_val
+                custo_unitario = custo_seguro / rendimento_val
 
                 rend_limpo = int(rendimento) if rendimento == int(rendimento) else rendimento
 
@@ -58,10 +52,11 @@ class DashboardView(ft.Column):
                         content=ft.ListTile(
                             leading=ft.Icon(ft.Icons.COOKIE, color=ft.Colors.AMBER, size=30),
                             title=ft.Text(nome, weight=ft.FontWeight.BOLD, size=18),
-                            subtitle=ft.Text(f"Rendimento: {rend_limpo} porções | "
+                            # Subtítulo atualizado para mostrar a % aplicada
+                            subtitle=ft.Text(f"Rendimento: {rend_limpo} un | +{porcentagem}% fixo\n"
                                              f"Custo Unitário: R$ {custo_unitario:.2f}"),
                             trailing=ft.Row([
-                                ft.Text(f"R$ {custo_total:.2f}",
+                                ft.Text(f"R$ {custo_seguro:.2f}",
                                         color=ft.Colors.GREEN_400,
                                         weight=ft.FontWeight.BOLD,
                                         size=16),
@@ -74,14 +69,13 @@ class DashboardView(ft.Column):
                             ], tight=True),
                             on_click=lambda _, r=rec: self.ao_editar(r)
                         ),
-
                     )
                 )
         self.update()
 
     def deletar_e_atualizar(self, e, r_id):
         self.db.deletar_receita(r_id)
-        self.carregar_dados() 
+        self.carregar_dados()
 
         self.page.snack_bar = ft.SnackBar(
             ft.Text("Receita excluída com sucesso!"),

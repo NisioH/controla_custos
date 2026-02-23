@@ -109,7 +109,7 @@ class IngredienteView(ft.Column):
         self.txt_peso_embalagem.value = str(dados[4])
         
         self.btn_salvar.text = "Atualizar Ingrediente"
-        self.btn_salvar.bgcolor = ft.Colors.ORANGE_800
+        self.btn_salvar.color = ft.Colors.WHITE
         self.update()
 
     def deletar(self, id_ing):
@@ -124,7 +124,7 @@ class IngredienteView(ft.Column):
         self.txt_preco_compra.value = ""
         self.txt_peso_embalagem.value = ""
         self.btn_salvar.text = "Salvar no Estoque"
-        self.btn_salvar.bgcolor = ft.Colors.BLUE_700
+        self.btn_salvar.color = ft.Colors.BLUE_700
         self.update()
 
     def notificar(self, msg):

@@ -9,6 +9,14 @@ class AppDoces:
     def __init__(self, page: ft.Page):
         self.page = page
         self.db = Database()
+
+        self.rascunho = {
+            "nome": "",
+            "rendimento": "1",
+            "porcentagem": "0",
+            "itens": []
+        }
+
         self.configurar_pagina()
         self.renderizar_interface()
 
@@ -18,33 +26,24 @@ class AppDoces:
         self.page.window.width = 450
         self.page.window.height = 800
         self.page.padding = 0
-
         self.page.go_home = lambda: self.mudar_aba(0)
 
     def renderizar_interface(self):
         self.view_dashboard = DashboardView(self.db, ao_editar=self.abrir_edicao_receita)
-        self.view_receita = ReceitaView(self.db)
+        self.view_receita = ReceitaView(db=self.db, app=self)  # CORRIGIDO
         self.view_ingrediente = IngredienteView(self.db)
 
         self.tela_dashboard = ft.Container(content=self.view_dashboard, visible=True, expand=True, padding=20)
         self.tela_receitas = ft.Container(content=self.view_receita, visible=False, expand=True, padding=20)
         self.tela_ingredientes = ft.Container(content=self.view_ingrediente, visible=False, expand=True, padding=20)
 
-        self.btn_inicio = ft.TextButton(
-            "Início",
-            on_click=lambda _: self.mudar_aba(0),
-            style=ft.ButtonStyle(color=ft.Colors.WHITE)
-        )
-        self.btn_receitas = ft.TextButton(
-            "Nova Receita",
-            on_click=lambda _: self.mudar_aba(1),
-            style=ft.ButtonStyle(color=ft.Colors.WHITE60)
-        )
-        self.btn_ingredientes = ft.TextButton(
-            "Ingredientes",
-            on_click=lambda _: self.mudar_aba(2),
-            style=ft.ButtonStyle(color=ft.Colors.WHITE60)
-        )
+        # Botões da barra superior
+        self.btn_inicio = ft.TextButton("Início", on_click=lambda _: self.mudar_aba(0),
+                                        style=ft.ButtonStyle(color=ft.Colors.WHITE))
+        self.btn_receitas = ft.TextButton("Nova Receita", on_click=lambda _: self.mudar_aba(1),
+                                          style=ft.ButtonStyle(color=ft.Colors.WHITE60))
+        self.btn_ingredientes = ft.TextButton("Ingredientes", on_click=lambda _: self.mudar_aba(2),
+                                              style=ft.ButtonStyle(color=ft.Colors.WHITE60))
 
         barra_superior = ft.Container(
             content=ft.Row(
@@ -69,20 +68,15 @@ class AppDoces:
         self.tela_receitas.visible = (indice == 1)
         self.tela_ingredientes.visible = (indice == 2)
 
-        if indice == 1:
-            self.view_receita.limpar_campos() 
-
-        self.btn_inicio.style.color = ft.Colors.WHITE if indice == 0 else ft.Colors.WHITE60
-        self.btn_receitas.style.color = ft.Colors.WHITE if indice == 1 else ft.Colors.WHITE60
-        self.btn_ingredientes.style.color = ft.Colors.WHITE if indice == 2 else ft.Colors.WHITE60
 
         if indice == 0: self.view_dashboard.carregar_dados()
-        if indice == 1: self.view_receita.carregar_dados()
+        if indice == 1: self.view_receita.ao_montar(None)
         if indice == 2: self.view_ingrediente.carregar_dados()
 
         self.page.update()
 
     def abrir_edicao_receita(self, dados_receita):
+        self.rascunho = {"nome": "", "rendimento": "1", "porcentagem": "0", "itens": []}
         self.mudar_aba(1)
         self.view_receita.preparar_edicao(dados_receita)
 
