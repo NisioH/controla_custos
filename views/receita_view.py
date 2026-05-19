@@ -98,11 +98,22 @@ class ReceitaView(ft.Column):
 
     def adicionar_item_lista(self, e):
         if self.sel_ingrediente.value and self.txt_quantidade.value:
-            self.lista_itens_temporaria.append({"id": int(self.sel_ingrediente.value),
-                                                "quantidade": float(self.txt_quantidade.value.replace(",", "."))})
-            self.txt_quantidade.value = ""
-            self.salvar_no_rascunho()
-            self.atualizar_lista_visual()
+            try:
+                qtd = float(self.txt_quantidade.value.replace(",", "."))
+                self.lista_itens_temporaria.append({
+                    "id": int(self.sel_ingrediente.value),
+                    "quantidade": qtd
+                })
+                self.txt_quantidade.value = ""
+                self.salvar_no_rascunho()
+                self.atualizar_lista_visual()
+            except ValueError:
+                if self.page:
+                    self.page.snack_bar = ft.SnackBar(
+                        ft.Text("Erro: Digite uma quantidade numérica válida.")
+                    )
+                    self.page.snack_bar.open = True
+                    self.page.update()
 
     def limpar_campos(self):
         self.id_receita_atual = None
@@ -129,13 +140,32 @@ class ReceitaView(ft.Column):
     def salvar_receita_completa(self, e):
         try:
             n = self.txt_nome_receita.value
+
+            # Valida se tem nome
+            if not n:
+                if self.page:
+                    self.page.snack_bar = ft.SnackBar(ft.Text("O nome da receita é obrigatório."))
+                    self.page.snack_bar.open = True
+                    self.page.update()
+                return
+
             r = float(self.txt_rendimento.value.replace(",", "."))
             p = float(self.txt_porcentagem.value.replace(",", "."))
+
             if self.id_receita_atual:
                 self.db.atualizar_receita(self.id_receita_atual, n, r, p, self.lista_itens_temporaria)
             else:
                 self.db.criar_receita(n, r, p, self.lista_itens_temporaria)
+
             self.limpar_campos()
             self.page.go_home()
+
+        except ValueError:
+            if self.page:
+                self.page.snack_bar = ft.SnackBar(
+                    ft.Text("Erro: Verifique os números digitados em rendimento e porcentagem.")
+                )
+                self.page.snack_bar.open = True
+                self.page.update()
         except Exception as err:
             print(f"Erro: {err}")

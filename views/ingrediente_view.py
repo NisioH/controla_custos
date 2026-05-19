@@ -82,11 +82,20 @@ class IngredienteView(ft.Column):
         self.update()
 
     def salvar_clicado(self, e):
+        nome = self.txt_nome.value
+        unidade = self.txt_unidade.value
+        str_preco = self.txt_preco_compra.value
+        str_peso = self.txt_peso_embalagem.value
+
+        # 1. Validação de campos vazios
+        if not nome or not str_preco or not str_peso:
+            self.notificar("Por favor, preencha todos os campos antes de salvar.")
+            return
+
         try:
-            nome = self.txt_nome.value
-            unidade = self.txt_unidade.value
-            preco = float(self.txt_preco_compra.value.replace(",", "."))
-            peso = float(self.txt_peso_embalagem.value.replace(",", "."))
+            # 2. Conversão segura (aqui o erro ValueError pode acontecer se tiver letras)
+            preco = float(str_preco.replace(",", "."))
+            peso = float(str_peso.replace(",", "."))
 
             if self.id_ingrediente_atual:
                 self.db.atualizar_ingrediente(self.id_ingrediente_atual, nome, unidade, preco, peso)
@@ -98,6 +107,9 @@ class IngredienteView(ft.Column):
             self.limpar_campos()
             self.carregar_dados()
 
+        except ValueError:
+            # 3. Avisa o usuário caso ele tenha digitado texto no lugar de números
+            self.notificar("Erro: Digite apenas valores numéricos válidos para preço e peso.")
         except Exception as err:
             self.notificar(f"Erro ao salvar: {err}")
 

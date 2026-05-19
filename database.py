@@ -59,6 +59,11 @@ class Database:
             cursor.execute("SELECT id, nome, unidade, preco, peso_embalagem FROM ingredientes ORDER BY nome")
             return cursor.fetchall()
 
+    def atualizar_ingrediente(self, id_ing, nome, unidade, preco, peso_embalagem):
+        with self.abrir_cursor() as cursor:
+            cursor.execute("UPDATE ingredientes SET nome=?, unidade=?, preco=?, peso_embalagem=? WHERE id=?",
+                           (nome, unidade, preco, peso_embalagem, id_ing))
+
     def buscar_preco(self, id_ing):
         with self.abrir_cursor() as cursor:
             cursor.execute("SELECT preco FROM ingredientes WHERE id = ?", (id_ing,))
