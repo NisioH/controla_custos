@@ -50,58 +50,57 @@ class DashboardView(ft.Column):
 
                 rend_limpo = int(rendimento) if rendimento == int(rendimento) else rendimento
 
-                # --- NOVO DESIGN ELEGANTE PARA O ITEM DA LISTA ---
+                # --- NOVO DESIGN RESPONSIVO (PERFEITO PARA CELULAR) ---
                 self.lista_receitas.controls.append(
                     ft.Container(
                         bgcolor=ft.Colors.BLUE_GREY_900,
-                        border_radius=15,  # Cantos mais arredondados para elegância
-                        padding=10,  # Padding maior para respiro
-                        content=ft.ListTile(
-                            leading=ft.Icon(ft.Icons.COOKIE, color=ft.Colors.AMBER, size=35),  # Ícone maior
-                            title=ft.Text(nome, weight=ft.FontWeight.BOLD, size=20),  # Título maior
+                        border_radius=15,
+                        padding=15,  # Padding ajustado
 
-                            # Subtítulo focado apenas nas informações de custo unitário
-                            subtitle=ft.Text(
-                                f"Rendimento: {rend_limpo} un | +{porcentagem}% fixo\n"
-                                f"Custo Un.: R$ {custo_unitario:.2f}"
+                        # Usando Row em vez de ListTile para controle total do espaço
+                        content=ft.Row([
+
+                            # 1. Ícone
+                            ft.Icon(ft.Icons.COOKIE, color=ft.Colors.AMBER, size=35),
+
+                            # 2. Textos (O expand=True aqui é a mágica que evita espremer o texto)
+                            ft.Column([
+                                ft.Text(nome, weight=ft.FontWeight.BOLD, size=18),
+                                ft.Text(
+                                    f"Rend.: {rend_limpo} un | +{porcentagem}%\n"
+                                    f"Custo: R$ {custo_unitario:.2f}",
+                                    size=13,
+                                    color=ft.Colors.WHITE70
+                                ),
+                            ], expand=True, spacing=2),
+
+                            # 3. Crachá de Venda (Sem width fixo, se ajusta ao conteúdo)
+                            ft.Container(
+                                content=ft.Column([
+                                    ft.Text("Venda Sugerida", size=11, color=ft.Colors.GREEN_100),
+                                    ft.Text(f"R$ {venda_sugerida_unidade:.2f}",
+                                            size=18,  # Fonte um pouquinho menor para caber melhor no mobile
+                                            color=ft.Colors.GREEN_ACCENT_400,
+                                            weight=ft.FontWeight.BOLD),
+                                ], alignment=ft.MainAxisAlignment.CENTER,
+                                    horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0, tight=True),
+                                bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.GREEN),
+                                border_radius=10,
+                                padding=ft.padding.symmetric(horizontal=8, vertical=5),
                             ),
 
-                            # Trailing REFORMULADO com tight=True para não cortar a altura
-                            trailing=ft.Row([
-                                # "Crachá" (Badge) para a Venda Sugerida
-                                ft.Container(
-                                    content=ft.Column([
-                                        ft.Text("Venda Sugerida", size=13, color=ft.Colors.GREEN_100),
-                                        ft.Text(f"R$ {venda_sugerida_unidade:.2f}",
-                                                size=20,
-                                                color=ft.Colors.GREEN_ACCENT_400,
-                                                weight=ft.FontWeight.BOLD),
-                                    ],
-                                        alignment=ft.MainAxisAlignment.CENTER,
-                                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                                        spacing=0,  # <-- Reduzido para aproximar os textos
-                                        tight=True),  # <-- A SOLUÇÃO: Força a coluna a ter a altura exata dos textos
+                            # 4. Botão de Exclusão
+                            ft.IconButton(
+                                icon=ft.Icons.DELETE_OUTLINE,
+                                icon_color=ft.Colors.RED_400,
+                                tooltip="Excluir Receita",
+                                on_click=lambda e, r_id=id_rec: self.deletar_e_atualizar(e, r_id)
+                            )
 
-                                    bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.GREEN),
-                                    border_radius=10,
-                                    padding=ft.padding.symmetric(horizontal=10, vertical=0),
-                                    # <-- Padding vertical menor
-                                    width=140,
-                                ),
+                        ], vertical_alignment=ft.CrossAxisAlignment.CENTER),
 
-                                # Botão de exclusão
-                                ft.Container(
-                                    content=ft.IconButton(
-                                        icon=ft.Icons.DELETE_OUTLINE,
-                                        icon_color=ft.Colors.RED_400,
-                                        tooltip="Excluir Receita",
-                                        on_click=lambda e, r_id=id_rec: self.deletar_e_atualizar(e, r_id)
-                                    ),
-                                    padding=ft.padding.only(left=2),
-                                ),
-                            ], tight=True),
-                            on_click=lambda _, r=rec: self.ao_editar(r)
-                        ),
+                        # O clique no container inteiro edita a receita (igual era no ListTile)
+                        on_click=lambda _, r=rec: self.ao_editar(r)
                     )
                 )
         self.update()
